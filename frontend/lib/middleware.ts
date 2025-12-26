@@ -1,11 +1,9 @@
-// middleware.ts (root level)
+// middleware.ts
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,9 +17,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -31,7 +27,8 @@ export async function updateSession(request: NextRequest) {
   );
 
   const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  const claims = data?.claims;
+  const userId = claims?.sub as string | undefined; // auth.users.id
 
   // Redirect root and /auth to login
   if (
@@ -43,7 +40,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Skip auth check for public routes
+  // Skip auth check for public auth routes
   if (
     request.nextUrl.pathname.startsWith("/auth") ||
     request.nextUrl.pathname.startsWith("/api/auth")
@@ -52,7 +49,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect unauthenticated users to login
-  if (!user) {
+  if (!userId) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
@@ -62,14 +59,21 @@ export async function updateSession(request: NextRequest) {
   if (request.nextUrl.pathname.match(/^\/[^/]+\/edit$/)) {
     const slug = request.nextUrl.pathname.split("/")[1];
 
-    const { data: company } = await supabase
+    const { data: company, error } = await supabase
       .from("company")
-      .select("id")
+      .select("id, user")
       .eq("slug", slug)
-      .eq("user", user.sub)
       .single();
 
-    if (!company) {
+    console.log("Middleware company check:", {
+      path: request.nextUrl.pathname,
+      slug,
+      userId,
+      companyUser: company?.user,
+      error: error?.message,
+    });
+
+    if (!company || company.user !== userId) {
       const url = request.nextUrl.clone();
       url.pathname = "/403";
       return NextResponse.redirect(url);
