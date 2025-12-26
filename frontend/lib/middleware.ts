@@ -1,3 +1,4 @@
+// middleware.ts (root level)
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -51,6 +52,25 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // NEW: Company slug protection for /[slug]/edit routes
+  if (user && request.nextUrl.pathname.match(/^\/[^/]+\/edit$/)) {
+    const slug = request.nextUrl.pathname.split("/")[1];
+
+    // Quick company ownership check in middleware
+    const { data: company } = await supabase
+      .from("company")
+      .select("id")
+      .eq("slug", slug)
+      .eq("user", user.sub) // user.sub = auth.users.id
+      .single();
+
+    if (!company) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/403";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:
@@ -66,3 +86,14 @@ export async function updateSession(request: NextRequest) {
 
   return supabaseResponse;
 }
+
+export const config = {
+  matcher: [
+    // Match all request paths except for the ones starting with:
+    // - api (API routes)
+    // - _next/static (static files)
+    // - _next/image (image optimization files)
+    // - favicon.ico (favicon file)
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
+};
