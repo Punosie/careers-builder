@@ -44,9 +44,7 @@ export async function POST(
 
     console.log("jobs/import first row:", rows[0]);
 
-    const { error: insertError } = await supabase
-      .from("jobs")
-      .insert(rows, { returning: "minimal" });
+    const { error: insertError } = await supabase.from("jobs").insert(rows);
 
     if (insertError) {
       console.error("jobs/import insertError:", insertError);
