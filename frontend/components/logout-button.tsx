@@ -1,6 +1,6 @@
 'use client'
 
-import { createClient } from '@/lib/supabaseClient.ts'
+import { createClient } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 

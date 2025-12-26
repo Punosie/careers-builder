@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabaseClient.ts'
+import { createClient } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
 import {
   Card,

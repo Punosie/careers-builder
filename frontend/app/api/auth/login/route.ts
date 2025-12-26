@@ -6,8 +6,6 @@ export async function POST(req: NextRequest) {
   const supabase = await createSupabaseServerClient();
   const { email, password } = await req.json();
 
-  console.log("🔐 Login attempt for:", email);
-
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -20,12 +18,6 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-
-  console.log("User authenticated:", {
-    id: data.user.id,
-    email: data.user.email,
-    userMetadata: data.user.user_metadata,
-  });
 
   const { data: company, error: companyError } = await supabase
     .from("company")
@@ -40,8 +32,6 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-
-  console.log("🏢 Company found:", company);
 
   return NextResponse.json({
     companySlug: company.slug,

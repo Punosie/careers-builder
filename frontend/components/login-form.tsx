@@ -41,12 +41,6 @@ export function LoginForm({
 
       if (!res.ok) throw new Error(json.error || "Login failed");
 
-      // CONSOLE LOGGING: Full response data
-      console.log("Login API Response:", json);
-
-      // TEMP: Log what would be the redirect URL
-      console.log("🔗 Redirecting to:", `/${json.companySlug}/edit`);
-
       router.push(`/${json.companySlug}/edit`);
     } catch (err: any) {
       console.error("Login Error:", err);
@@ -108,7 +102,7 @@ export function LoginForm({
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              &apos; have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/auth/sign-up"
                 className="underline underline-offset-4"

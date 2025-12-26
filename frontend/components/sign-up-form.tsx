@@ -1,140 +1,139 @@
+// components/sign-up-form.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabaseClient";
-import type { User } from "@supabase/supabase-js";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-const supabase = createClient();
-
-export interface Company {
-  id: string;
-  slug: string | null;
-  name: string | null;
-  user: string; // owner id
-  logo: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  theme: Record<string, any> | null; // JSONB field
-}
-
-export default function EditPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [company, setCompany] = useState<Company | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
+export function SignUpForm({
+  // ✅ NAMED EXPORT
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  // Local state for form fields
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
-  useEffect(() => {
-    async function fetchUserAndCompany() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // 1. Get logged-in user
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) throw new Error("No user logged in");
-        setUser(user);
-
-        // 2. Fetch company
-        const { data: companyData, error } = await supabase
-          .from("company")
-          .select("*")
-          .eq("user", user.id)
-          .single();
-
-        if (error) throw error;
-        setCompany(companyData ?? null);
-
-        // 3. Set form values
-        if (companyData) {
-          setName(companyData.name ?? "");
-          setSlug(companyData.slug ?? "");
-        }
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "An error occurred");
-      } finally {
-        setLoading(false);
-      }
+    if (password !== repeatPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
     }
 
-    fetchUserAndCompany();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!company) return;
-
     try {
-      setUpdating(true);
-      setError(null);
+      const res = await fetch("/api/auth/sign-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, companyName }),
+      });
 
-      const { data, error } = await supabase
-        .from("company")
-        .update({
-          name,
-          slug,
-        })
-        .eq("id", company.id)
-        .select()
-        .single();
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Sign up failed");
 
-      if (error) throw error;
-
-      setCompany(data);
-      alert("Company updated successfully!");
+      router.push(`/${json.companySlug}/edit`);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Failed to update company");
+      console.error("Sign up error:", err);
+      setError(err.message || "An error occurred");
     } finally {
-      setUpdating(false);
+      setIsLoading(false);
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!user) return <p>Please log in to see this page.</p>;
-  if (!company) return <p>No company found for this user.</p>;
-
   return (
-    <div>
-      <h1>Edit Company</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border p-2"
-          />
-        </div>
-
-        <div>
-          <label>Slug:</label>
-          <input
-            type="text"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="border p-2"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={updating}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          {updating ? "Updating..." : "Update Company"}
-        </button>
-      </form>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Sign up</CardTitle>
+          <CardDescription>Create a new account</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSignUp}>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="repeat-password">Repeat Password</Label>
+                </div>
+                <Input
+                  id="repeat-password"
+                  type="password"
+                  required
+                  value={repeatPassword}
+                  onChange={(e) => setRepeatPassword(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="company-name">Company Name</Label>
+                </div>
+                <Input
+                  id="company-name"
+                  type="text"
+                  required
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+              </div>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              <Button
+                type="submit"
+                className="w-full bg-blue-700 hover:bg-blue-600"
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating an account..." : "Sign up"}
+              </Button>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Already have an account?{" "}
+              <Link href="/auth/login" className="underline underline-offset-4">
+                Login
+              </Link>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
