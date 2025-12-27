@@ -27,9 +27,11 @@ type Job = {
 export default function JobsPreview({
   jobs,
   primaryColor,
+  textColor,
 }: {
   jobs: Job[] | null | undefined;
   primaryColor: string;
+  textColor: string;
 }) {
   const safeJobs: Job[] = Array.isArray(jobs) ? jobs : [];
 
@@ -118,13 +120,15 @@ export default function JobsPreview({
     <section className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold">Open Roles</h2>
-          <p className="text-sm text-gray-500">
+          <h2 className="text-xl font-semibold" style={{ color: textColor }}>
+            Open Roles
+          </h2>
+          <p className="text-sm opacity-70">
             Search and filter through all available roles.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div className="flex items-center gap-2 text-xs opacity-70">
           <span>Rows per page</span>
           <div className="flex items-center gap-1">
             {[10, 25, 50].map((size) => {
@@ -139,9 +143,12 @@ export default function JobsPreview({
                   }}
                   className={
                     "h-7 w-9 flex items-center justify-center rounded-md text-xs transition-colors " +
-                    (isActive
-                      ? "bg-neutral-900 text-white"
-                      : "text-neutral-500 hover:bg-neutral-100")
+                    (isActive ? "text-white" : "hover:bg-neutral-100")
+                  }
+                  style={
+                    isActive
+                      ? { backgroundColor: primaryColor }
+                      : { color: textColor }
                   }
                 >
                   {size}
@@ -155,7 +162,7 @@ export default function JobsPreview({
       {/* Search + text input filters */}
       <div className="flex flex-wrap gap-3 items-end">
         <div className="w-full md:w-64">
-          <label className="text-xs text-gray-500 mb-1 block">Search</label>
+          <label className="text-xs opacity-70 mb-1 block">Search</label>
           <Input
             placeholder="Search by title, location, department..."
             value={search}
@@ -168,7 +175,7 @@ export default function JobsPreview({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs text-gray-500">Location</label>
+          <label className="text-xs opacity-70">Location</label>
           <div className="relative">
             <Input
               placeholder="Filter location..."
@@ -193,7 +200,7 @@ export default function JobsPreview({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs text-gray-500">Department</label>
+          <label className="text-xs opacity-70">Department</label>
           <div className="relative">
             <Input
               placeholder="Filter department..."
@@ -218,7 +225,7 @@ export default function JobsPreview({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs text-gray-500">Job Type</label>
+          <label className="text-xs opacity-70">Job Type</label>
           <div className="relative">
             <Input
               placeholder="Filter job type..."
@@ -243,7 +250,7 @@ export default function JobsPreview({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs text-gray-500">Experience</label>
+          <label className="text-xs opacity-70">Experience</label>
           <div className="relative">
             <Input
               placeholder="Filter experience..."
@@ -273,6 +280,7 @@ export default function JobsPreview({
             size="sm"
             className="text-xs h-9"
             onClick={clearFilters}
+            style={{ color: primaryColor }}
           >
             Clear all filters
           </Button>
@@ -288,18 +296,25 @@ export default function JobsPreview({
               key={job.id}
               open={isOpen}
               onOpenChange={(open) => setOpenJobId(open ? job.id : null)}
-              className="border border-gray-200 rounded-lg bg-white overflow-hidden transition-shadow hover:border-gray-300"
+              className="rounded-lg bg-white overflow-hidden transition-shadow"
+              style={{
+                borderColor: primaryColor + "33", // light tint
+                borderWidth: 1,
+                borderStyle: "solid",
+              }}
             >
               <div className="px-4 py-3 flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">{job.title}</h3>
-                  <p className="text-xs text-gray-500">
+                  <h3 className="font-medium" style={{ color: textColor }}>
+                    {job.title}
+                  </h3>
+                  <p className="text-xs opacity-70">
                     {job.location}
                     {job.employment_type ? ` · ${job.employment_type}` : ""}
                     {job.is_remote ? " · Remote" : ""}
                   </p>
                   {job.salary_range && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs opacity-70">
                       Salary: {job.salary_range}
                     </p>
                   )}
@@ -308,7 +323,13 @@ export default function JobsPreview({
                   <Button
                     variant="outline"
                     size="sm"
-                    style={{ borderColor: primaryColor, color: primaryColor }}
+                    style={{
+                      borderColor: primaryColor,
+                      color: primaryColor,
+                      backgroundColor: isOpen
+                        ? primaryColor + "0D"
+                        : "transparent",
+                    }}
                     className="flex items-center gap-1"
                   >
                     {isOpen ? "Close" : "View"}
@@ -328,31 +349,55 @@ export default function JobsPreview({
                     job.experience_level) && (
                     <div className="flex flex-wrap gap-1">
                       {job.department && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge
+                          variant="outline"
+                          className="text-xs"
+                          style={{
+                            borderColor: primaryColor + "55",
+                            color: primaryColor,
+                          }}
+                        >
                           {job.department}
                         </Badge>
                       )}
                       {job.employment_type && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge
+                          variant="outline"
+                          className="text-xs"
+                          style={{
+                            borderColor: primaryColor + "55",
+                            color: primaryColor,
+                          }}
+                        >
                           {job.employment_type}
                         </Badge>
                       )}
                       {job.experience_level && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge
+                          variant="outline"
+                          className="text-xs"
+                          style={{
+                            borderColor: primaryColor + "55",
+                            color: primaryColor,
+                          }}
+                        >
                           {job.experience_level}
                         </Badge>
                       )}
                     </div>
                   )}
 
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm" style={{ color: textColor }}>
                     {job.description ||
                       "Detailed description for this role will appear here."}
                   </p>
 
                   <Button
                     className="w-full"
-                    style={{ backgroundColor: primaryColor }}
+                    style={{
+                      backgroundColor: primaryColor,
+                      color: "#ffffff",
+                    }}
                   >
                     Apply now
                   </Button>
@@ -363,7 +408,7 @@ export default function JobsPreview({
         })}
 
         {!paginatedJobs.length && (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm opacity-70">
             No roles match your search or filters.
           </p>
         )}
@@ -371,7 +416,7 @@ export default function JobsPreview({
 
       {/* Pagination controls */}
       {filteredJobs.length > 0 && (
-        <div className="flex items-center justify-between text-xs text-gray-500 pt-2">
+        <div className="flex items-center justify-between text-xs opacity-70 pt-2">
           <span>
             Showing {(safePage - 1) * pageSize + 1}–
             {Math.min(safePage * pageSize, filteredJobs.length)} of{" "}

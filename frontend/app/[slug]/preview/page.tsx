@@ -116,7 +116,11 @@ export default async function PreviewPage({
           </section>
         ) : null}
 
-        <JobsPreview jobs={jobs || []} primaryColor={primary} />
+        <JobsPreview
+          jobs={jobs || []}
+          primaryColor={primary}
+          textColor={text}
+        />
       </main>
     </div>
   );

@@ -1,9 +1,17 @@
+// app/[slug]/edit/EditCompanyLayout.tsx
 "use client";
 
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import BrandingTab from "./tabs/BrandingTab";
 import JobsTab from "./tabs/JobsTab";
+
+interface Theme {
+  primary_color?: string;
+  secondary_color?: string;
+  bg_color?: string;
+  text_color?: string;
+}
 
 interface Company {
   id: string;
@@ -15,17 +23,11 @@ interface Company {
   long_description: string | null;
   life_at_company: string | null;
   benefits: string | null;
-  theme: {
-    primary_color?: string;
-    secondary_color?: string;
-    bg_color?: string;
-    text_color?: string;
-  } | null;
+  theme: Theme | null;
 }
 
 type TabId = "branding" | "jobs";
 
-// EditCompanyLayout.tsx
 export default function EditCompanyLayout({ company }: { company: Company }) {
   const [activeTab, setActiveTab] = useState<TabId>("branding");
 
@@ -35,7 +37,7 @@ export default function EditCompanyLayout({ company }: { company: Company }) {
         <Sidebar
           activeTab={activeTab}
           onChangeTab={setActiveTab}
-          slug={company.slug!} // assumes slug is not null
+          slug={company.slug!}
         />
         <main className="flex-1 p-8">
           {activeTab === "branding" && <BrandingTab company={company} />}

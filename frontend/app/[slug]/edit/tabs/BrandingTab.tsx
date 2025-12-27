@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -47,11 +48,99 @@ export default function BrandingTab({ company }: { company: Company }) {
   const [textColor, setTextColor] = useState(
     company.theme?.text_color ?? "#111827"
   );
+
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [logoPreviewName, setLogoPreviewName] = useState<string | null>(null);
+  const [bannerPreviewName, setBannerPreviewName] = useState<string | null>(
+    null
+  );
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const processSquareImage = async (file: File) => {
+    return new Promise<File>((resolve, reject) => {
+      // Always use the browser Image constructor
+      const img = new window.Image(); // type: HTMLImageElement
+
+      img.onload = () => {
+        const side = Math.min(img.width, img.height);
+        const startX = (img.width - side) / 2;
+        const startY = (img.height - side) / 2;
+
+        const targetSide = Math.max(250, Math.min(500, side));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetSide;
+        canvas.height = targetSide;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas not supported"));
+          return;
+        }
+
+        ctx.drawImage(
+          img,
+          startX,
+          startY,
+          side,
+          side,
+          0,
+          0,
+          targetSide,
+          targetSide
+        );
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to create image blob"));
+              return;
+            }
+            const squaredFile = new File([blob], file.name, {
+              type: blob.type,
+              lastModified: Date.now(),
+            });
+            resolve(squaredFile);
+          },
+          "image/jpeg",
+          0.9
+        );
+      };
+
+      img.onerror = (e) => reject(e);
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setLogoFile(null);
+      setLogoPreviewName(null);
+      return;
+    }
+    try {
+      const processed = await processSquareImage(file);
+      setLogoFile(processed);
+      setLogoPreviewName(
+        `${processed.name} (${Math.round(processed.size / 1024)} KB)`
+      );
+    } catch (err) {
+      console.error(err);
+      setError("Failed to process logo image");
+    }
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setBannerFile(file);
+    setBannerPreviewName(
+      file ? `${file.name} (${Math.round(file.size / 1024)} KB)` : null
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,7 +197,9 @@ export default function BrandingTab({ company }: { company: Company }) {
         <h2 className="text-lg font-semibold">Company</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">
+              Slug<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="slug"
               value={slug}
@@ -117,7 +208,9 @@ export default function BrandingTab({ company }: { company: Company }) {
             />
           </div>
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">
+              Name<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="name"
               value={name}
@@ -127,31 +220,71 @@ export default function BrandingTab({ company }: { company: Company }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="logo">Logo</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <div className="space-y-2">
+            <Label htmlFor="logo">
+              Logo<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="logo"
               type="file"
               accept="image/*"
-              onChange={(e) =>
-                setLogoFile(e.target.files ? e.target.files[0] : null)
-              }
+              required={!company.logo}
+              onChange={handleLogoChange}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Upload an image. A square crop editor can be opened after upload.
-            </p>
+            {logoPreviewName && (
+              <p className="text-xs text-gray-600 mt-1">{logoPreviewName}</p>
+            )}
+            {!logoPreviewName && (
+              <p className="text-xs text-gray-500 mt-1">
+                Image will be cropped to a square (250–500px).
+              </p>
+            )}
+            {company.logo && !logoPreviewName && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500 mb-1">Current logo</p>
+                <Image
+                  src={company.logo}
+                  alt={company.name || "Logo"}
+                  width={80}
+                  height={80}
+                  className="rounded-md object-cover border border-gray-200"
+                />
+              </div>
+            )}
           </div>
-          <div>
-            <Label htmlFor="banner">Banner</Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="banner">
+              Banner<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="banner"
               type="file"
               accept="image/*"
-              onChange={(e) =>
-                setBannerFile(e.target.files ? e.target.files[0] : null)
-              }
+              required={!company.banner}
+              onChange={handleBannerChange}
             />
+            {bannerPreviewName && (
+              <p className="text-xs text-gray-600 mt-1">{bannerPreviewName}</p>
+            )}
+            {!bannerPreviewName && (
+              <p className="text-xs text-gray-500 mt-1">
+                Wide image works best for the banner.
+              </p>
+            )}
+            {company.banner && !bannerPreviewName && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500 mb-1">Current banner</p>
+                <Image
+                  src={company.banner}
+                  alt="Banner"
+                  width={240}
+                  height={80}
+                  className="rounded-md object-cover border border-gray-200"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -166,9 +299,12 @@ export default function BrandingTab({ company }: { company: Company }) {
         </div>
 
         <div>
-          <Label htmlFor="long_description">Long Description</Label>
+          <Label htmlFor="long_description">
+            Long Description<span className="text-red-500 ml-0.5">*</span>
+          </Label>
           <Textarea
             id="long_description"
+            required
             value={longDescription}
             onChange={(e) => setLongDescription(e.target.value)}
             rows={4}
@@ -176,18 +312,24 @@ export default function BrandingTab({ company }: { company: Company }) {
         </div>
 
         <div>
-          <Label htmlFor="life_at_company">Life At Company</Label>
+          <Label htmlFor="life_at_company">
+            Life At Company<span className="text-red-500 ml-0.5">*</span>
+          </Label>
           <Textarea
             id="life_at_company"
+            required
             value={lifeAtCompany}
             onChange={(e) => setLifeAtCompany(e.target.value)}
             rows={4}
           />
         </div>
         <div>
-          <Label htmlFor="benefits">Benefits</Label>
+          <Label htmlFor="benefits">
+            Benefits<span className="text-red-500 ml-0.5">*</span>
+          </Label>
           <Textarea
             id="benefits"
+            required
             value={benefits}
             onChange={(e) => setBenefits(e.target.value)}
             rows={4}
@@ -200,39 +342,51 @@ export default function BrandingTab({ company }: { company: Company }) {
         <h2 className="text-lg font-semibold">Theme</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <Label htmlFor="primary_color">Primary Color</Label>
+            <Label htmlFor="primary_color">
+              Primary Color<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="primary_color"
               type="color"
               value={primaryColor}
               onChange={(e) => setPrimaryColor(e.target.value)}
+              required
             />
           </div>
           <div>
-            <Label htmlFor="secondary_color">Secondary Color</Label>
+            <Label htmlFor="secondary_color">
+              Secondary Color<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="secondary_color"
               type="color"
               value={secondaryColor}
               onChange={(e) => setSecondaryColor(e.target.value)}
+              required
             />
           </div>
           <div>
-            <Label htmlFor="bg_color">Background Color</Label>
+            <Label htmlFor="bg_color">
+              Background Color<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="bg_color"
               type="color"
               value={bgColor}
               onChange={(e) => setBgColor(e.target.value)}
+              required
             />
           </div>
           <div>
-            <Label htmlFor="text_color">Text Color</Label>
+            <Label htmlFor="text_color">
+              Text Color<span className="text-red-500 ml-0.5">*</span>
+            </Label>
             <Input
               id="text_color"
               type="color"
               value={textColor}
               onChange={(e) => setTextColor(e.target.value)}
+              required
             />
           </div>
         </div>

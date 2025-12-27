@@ -3,6 +3,13 @@
 
 import { useState } from "react";
 
+interface Theme {
+  primary_color?: string;
+  secondary_color?: string;
+  bg_color?: string;
+  text_color?: string;
+}
+
 interface Company {
   id: string;
   slug: string | null;
@@ -11,7 +18,7 @@ interface Company {
   logo: string | null;
   created_at: string | null;
   updated_at: string | null;
-  theme: Record<string, any> | null;
+  theme: Theme | null;
 }
 
 export default function EditCompanyForm({ company }: { company: Company }) {
