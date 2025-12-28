@@ -28,24 +28,24 @@ export async function updateSession(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
-  const userId = claims?.sub as string | undefined; // auth.users.id
+  const userId = claims?.sub as string | undefined;
+  const pathname = request.nextUrl.pathname;
+
+  // Skip auth check for public routes
+  if (
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/api/auth") ||
+    pathname.match(/^\/[^/]+\/(careers|preview)$/) || // Public careers & preview pages
+    pathname === "/403"
+  ) {
+    return supabaseResponse;
+  }
 
   // Redirect root and /auth to login
-  if (
-    request.nextUrl.pathname === "/" ||
-    request.nextUrl.pathname === "/auth"
-  ) {
+  if (pathname === "/" || pathname === "/auth") {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
-  }
-
-  // Skip auth check for public auth routes
-  if (
-    request.nextUrl.pathname.startsWith("/auth") ||
-    request.nextUrl.pathname.startsWith("/api/auth")
-  ) {
-    return supabaseResponse;
   }
 
   // Redirect unauthenticated users to login
@@ -55,9 +55,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Company slug protection for /[slug]/edit routes
-  if (request.nextUrl.pathname.match(/^\/[^/]+\/edit$/)) {
-    const slug = request.nextUrl.pathname.split("/")[1];
+  // Company slug protection for /[slug]/edit routes ONLY
+  if (pathname.match(/^\/[^/]+\/edit$/)) {
+    const slug = pathname.split("/")[1];
 
     const { data: company, error } = await supabase
       .from("company")
@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
       .single();
 
     console.log("Middleware company check:", {
-      path: request.nextUrl.pathname,
+      path: pathname,
       slug,
       userId,
       companyUser: company?.user,
