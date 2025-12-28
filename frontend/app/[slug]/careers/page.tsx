@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
 import JobsPreview from "../preview/JobsPreview";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { ReactNode } from "react";
 
 type LayoutSectionId = "about" | "life" | "benefits" | "jobs";
 
@@ -67,7 +68,7 @@ export default async function CareersPage({
   const cardBg = "rgba(0,0,0,0.55)";
   const cardBorder = "rgba(255,255,255,0.08)";
 
-  const sections: Record<LayoutSectionId, JSX.Element | null> = {
+  const sections: Record<LayoutSectionId, ReactNode> = {
     about: company.long_description ? (
       <section
         key="about"

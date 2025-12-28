@@ -11,13 +11,13 @@ import { useState } from "react";
 export function ForgotPasswordForm({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<"form">) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
@@ -46,7 +46,7 @@ export function ForgotPasswordForm({
   if (success) {
     // Outer layout already shows heading/description; only small success hint.
     return (
-      <div className={cn("text-sm text-slate-300", className)} {...props}>
+      <div className={cn("text-sm text-slate-300", className)}>
         <p>
           If an account exists for{" "}
           <span className="font-medium text-slate-50">{email}</span>, a reset

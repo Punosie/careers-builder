@@ -49,11 +49,5 @@ export default async function EditPage({
     redirect("/404");
   }
 
-  return (
-    <EditCompanyLayout
-      title={company.name || "Company Settings"}
-      subtitle="Customize your FlowHire workspace"
-      company={company as Company}
-    />
-  );
+  return <EditCompanyLayout company={company as Company} />;
 }

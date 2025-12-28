@@ -1,4 +1,5 @@
 // app/[slug]/preview/page.tsx
+import type { ReactNode } from "react";
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
 import JobsPreview from "./JobsPreview";
@@ -60,7 +61,7 @@ export default async function PreviewPage({
   const cardBg = "rgba(0,0,0,0.55)";
   const cardBorder = "rgba(255,255,255,0.08)";
 
-  const sections: Record<LayoutSectionId, JSX.Element | null> = {
+  const sections: Record<LayoutSectionId, ReactNode> = {
     about: company.long_description ? (
       <section
         key="about"
@@ -112,6 +113,7 @@ export default async function PreviewPage({
         <JobsPreview
           jobs={jobs || []}
           primaryColor={primary}
+          secondaryColor={secondary}
           textColor={text}
           companyId={company.id}
         />
