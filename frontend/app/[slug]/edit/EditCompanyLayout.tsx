@@ -117,8 +117,8 @@ export default function EditCompanyLayout({ company }: { company: Company }) {
             </aside>
 
             {/* main content */}
-            <div className="flex h-full flex-1 flex-col bg-gradient-to-b from-slate-950/40 to-slate-950/80 text-slate-50">
-              <main className="flex-1 overflow-auto px-8 py-8">
+            <div className="flex h-full flex-1 flex-col bg-linear-to-b from-slate-950/40 to-slate-950/80 text-slate-50">
+              <main className="flex-1 overflow-auto scrollbar-none px-8 py-8">
                 {renderTabContent()}
               </main>
             </div>
