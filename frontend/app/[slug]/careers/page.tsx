@@ -1,12 +1,12 @@
-// app/[slug]/preview/page.tsx
+// app/[slug]/careers/page.tsx
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 import Image from "next/image";
-import JobsPreview from "./JobsPreview";
+import JobsPreview from "../preview/JobsPreview";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type LayoutSectionId = "about" | "life" | "benefits" | "jobs";
 
-export default async function PreviewPage({
+export default async function CareersPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
@@ -14,6 +14,7 @@ export default async function PreviewPage({
   const supabase = await createSupabaseServerClient();
   const { slug } = await params;
 
+  // Company + theme
   const { data: company } = await supabase
     .from("company")
     .select(
@@ -34,13 +35,19 @@ export default async function PreviewPage({
     );
   }
 
-  const { data: jobs } = await supabase
+  // Jobs
+  const { data: jobs, error: jobsError } = await supabase
     .from("jobs")
     .select(
       "id, title, description, location, salary_range, job_slug, is_remote, department, employment_type, experience_level"
     )
     .eq("company", company.id);
 
+  if (jobsError) {
+    console.error("Careers jobs error:", jobsError);
+  }
+
+  // Layout order
   const { data: layoutRow } = await supabase
     .from("pageLayout")
     .select("layout_order")
@@ -112,6 +119,7 @@ export default async function PreviewPage({
         <JobsPreview
           jobs={jobs || []}
           primaryColor={primary}
+          secondaryColor={secondary}
           textColor={text}
           companyId={company.id}
         />
@@ -121,35 +129,19 @@ export default async function PreviewPage({
 
   return (
     <div className="relative flex min-h-svh w-full items-start justify-center overflow-hidden bg-slate-950">
-      {/* gradient + noise based on bg + secondary */}
+      {/* gradient + noise based on bg + secondary (identical to preview) */}
       <div
         className="pointer-events-none absolute inset-0 opacity-90"
         style={{
           backgroundImage: `
             radial-gradient(circle at top, ${bg} 0, transparent 55%),
-            radial-gradient(circle at bottom, ${bg} 0, transparent 55%)
+            radial-gradient(circle at bottom, ${secondary} 0, transparent 55%)
           `,
         }}
       />
       <div className="pointer-events-none absolute inset-0 bg-[url('/noise.png')] opacity-25 mix-blend-soft-light" />
 
-      {/* FlowHire logo */}
-      <div className="absolute left-6 top-6 flex items-center gap-2">
-        <div
-          className="flex h-9 w-9 items-center justify-center rounded-2xl text-lg font-semibold shadow-lg shadow-sky-500/40"
-          style={{
-            backgroundImage: `linear-gradient(to bottom right, ${primary}, ${secondary})`,
-          }}
-        >
-          F
-        </div>
-        <div className="hidden flex-col text-sm font-medium text-slate-100/90 sm:flex">
-          <span>FlowHire</span>
-          <span className="text-xs text-slate-300/80">Careers Preview</span>
-        </div>
-      </div>
-
-      {/* main content */}
+      {/* main content (no FlowHire logo for public careers page) */}
       <div className="relative z-10 w-full max-w-5xl px-4 pb-16 pt-20">
         <header className="mb-6 flex items-center gap-6">
           {company.logo ? (

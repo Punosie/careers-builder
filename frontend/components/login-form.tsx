@@ -2,13 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -38,81 +31,104 @@ export function LoginForm({
       });
 
       const json = await res.json();
-
       if (!res.ok) throw new Error(json.error || "Login failed");
 
       router.push(`/${json.companySlug}/edit`);
     } catch (err: any) {
       console.error("Login Error:", err);
-      setError(err.message || "An error occurred");
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // JSX remains identical
+  const inputClass =
+    "h-10 rounded-xl border-slate-700/70 bg-slate-900/70 text-sm text-slate-50 " +
+    "placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-sky-500 " +
+    "focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950";
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button
-                type="submit"
-                className="w-full bg-blue-700 hover:bg-blue-600 "
-                disabled={isLoading}
-              >
-                {isLoading ? "Logging in..." : "Login"}
-              </Button>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="underline underline-offset-4"
-              >
-                Sign up
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <form
+      onSubmit={handleLogin}
+      className={cn("space-y-6", className)}
+      {...props}
+    >
+      <div className="grid gap-2">
+        <Label
+          htmlFor="email"
+          className="text-xs font-medium uppercase tracking-wide text-slate-300"
+        >
+          Email
+        </Label>
+        <Input
+          id="email"
+          type="email"
+          placeholder="you@company.com"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className={inputClass}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <div className="flex items-center">
+          <Label
+            htmlFor="password"
+            className="text-xs font-medium uppercase tracking-wide text-slate-300"
+          >
+            Password
+          </Label>
+          <Link
+            href="/auth/forgot-password"
+            className="ml-auto text-xs font-medium text-sky-400 hover:text-sky-300"
+          >
+            Forgot your password?
+          </Link>
+        </div>
+        <Input
+          id="password"
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className={inputClass}
+        />
+      </div>
+
+      {error && <p className="text-sm font-medium text-red-400">{error}</p>}
+
+      <Button
+        type="submit"
+        className="w-full rounded-xl bg-linear-to-r from-sky-500 to-blue-600 text-sm font-semibold shadow-lg shadow-sky-700/40 hover:from-sky-400 hover:to-blue-500 disabled:cursor-not-allowed"
+        disabled={isLoading}
+      >
+        {isLoading ? "Logging in..." : "Login"}
+      </Button>
+
+      <p className="text-center text-xs text-slate-400">
+        By continuing you agree to our{" "}
+        <span className="cursor-pointer text-sky-400 hover:text-sky-300">
+          Terms
+        </span>{" "}
+        and{" "}
+        <span className="cursor-pointer text-sky-400 hover:text-sky-300">
+          Privacy Policy
+        </span>
+        .
+      </p>
+
+      <div className="h-px bg-linear-to-r from-transparent via-slate-700/70 to-transparent" />
+
+      <div className="text-center text-sm text-slate-300">
+        Do not have an account?{" "}
+        <Link
+          href="/auth/sign-up"
+          className="font-medium text-sky-400 hover:text-sky-300"
+        >
+          Sign up
+        </Link>
+      </div>
+    </form>
   );
 }

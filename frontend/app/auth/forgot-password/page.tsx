@@ -1,11 +1,18 @@
-import { ForgotPasswordForm } from '@/components/forgot-password-form'
+// app/(auth)/forgot-password/page.tsx
+import { ForgotPasswordForm } from "@/components/forgot-password-form";
+import { AuthLayout } from "../components/auth-layout";
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-blue-50">
-      <div className="w-full max-w-sm">
-        <ForgotPasswordForm />
-      </div>
-    </div>
-  )
+    <AuthLayout
+      title="Reset your password"
+      subtitle="Enter the email you used to sign up. A secure reset link will be sent if an account exists."
+    >
+      <ForgotPasswordForm />
+      <p className="mt-4 text-xs text-slate-300/80">
+        For security, password reset links expire after 15 minutes. If you did
+        not request this, you can ignore the email.
+      </p>
+    </AuthLayout>
+  );
 }

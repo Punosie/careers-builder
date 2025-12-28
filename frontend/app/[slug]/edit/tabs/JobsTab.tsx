@@ -132,28 +132,29 @@ export default function JobsTab({ companyId }: { companyId: string }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-2xl border border-slate-700/60 bg-slate-900/60 p-6 text-slate-50 shadow-xl shadow-slate-950/50 backdrop-blur-2xl">
       <div>
-        <h1 className="text-2xl font-semibold mb-1">Jobs</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="mb-1 text-2xl font-semibold">Jobs</h1>
+        <p className="text-sm text-slate-400">
           Upload a CSV or Excel file to bulk import jobs for this company.
         </p>
       </div>
 
       <div className="space-y-3">
-        <Label>Jobs file</Label>
+        <Label className="text-sm text-slate-200">Jobs file</Label>
         <div className="flex items-center gap-3">
           <Button
             type="button"
             variant="outline"
             onClick={() => fileInputRef.current?.click()}
+            className="rounded-xl border-slate-700/80 bg-slate-900/80 text-sm text-slate-100 hover:border-slate-500 hover:bg-slate-800/90"
           >
             Choose file
           </Button>
-          <span className="text-sm text-gray-600">
-            {file ? file.name : "No file chosen"}
-          </span>
         </div>
+        <span className="text-sm text-slate-300">
+          {file ? file.name : "No file chosen"}
+        </span>
         <input
           ref={fileInputRef}
           id="jobs_csv"
@@ -162,7 +163,7 @@ export default function JobsTab({ companyId }: { companyId: string }) {
           className="hidden"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
         />
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-slate-500">
           Expected columns: title, is_remote, location, department,
           employment_type, experience_level, job_type, salary_range, job_slug,
           posted_days_ago, skills, last_application_date
@@ -170,20 +171,20 @@ export default function JobsTab({ companyId }: { companyId: string }) {
       </div>
 
       {parsedCount !== null && (
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-slate-300">
           Parsed {parsedCount} rows from file.
         </p>
       )}
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
       {success && (
-        <p className="text-sm text-emerald-600">Jobs imported successfully.</p>
+        <p className="text-sm text-emerald-400">Jobs imported successfully.</p>
       )}
 
       <Button
         onClick={handleParseAndUpload}
         disabled={!file || uploading}
-        className="bg-blue-700 hover:bg-blue-600"
+        className="rounded-xl bg-linear-to-r from-sky-500 to-blue-600 text-sm font-semibold shadow-lg shadow-sky-900/50 hover:from-sky-400 hover:to-blue-500 disabled:cursor-not-allowed"
       >
         {uploading ? "Uploading..." : "Upload & Import"}
       </Button>

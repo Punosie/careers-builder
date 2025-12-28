@@ -1,11 +1,14 @@
+// app/(auth)/sign-up/page.tsx
 import { SignUpForm } from "@/components/sign-up-form";
+import { AuthLayout } from "../components/auth-layout";
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-blue-50">
-      <div className="w-full max-w-sm">
-        <SignUpForm />
-      </div>
-    </div>
+    <AuthLayout
+      title="Create your workspace"
+      subtitle="Spin up a new organization in seconds. Invite your team and start shipping faster together."
+    >
+      <SignUpForm />
+    </AuthLayout>
   );
 }

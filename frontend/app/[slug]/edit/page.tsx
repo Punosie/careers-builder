@@ -42,14 +42,18 @@ export default async function EditPage({
     .select(
       "id, slug, name, logo, banner, short_description, long_description, life_at_company, theme, benefits"
     )
-    .eq("slug", slug) // ✅ no user filter, middleware already enforced ownership
+    .eq("slug", slug)
     .single();
 
   if (error || !company) {
-    // Slug doesn't exist at all → 404 (or keep 403 if you prefer)
     redirect("/404");
-    // or: redirect("/403");
   }
 
-  return <EditCompanyLayout company={company as Company} />;
+  return (
+    <EditCompanyLayout
+      title={company.name || "Company Settings"}
+      subtitle="Customize your FlowHire workspace"
+      company={company as Company}
+    />
+  );
 }

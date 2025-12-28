@@ -1,22 +1,21 @@
-// app/[slug]/preview/loading.tsx
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PreviewLoading() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <header className="max-w-5xl mx-auto py-10 px-4 flex gap-6 items-center">
-        <Skeleton className="w-16 h-16 rounded-lg" />
-        <div className="space-y-2 flex-1">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <header className="mx-auto flex max-w-5xl items-center gap-6 px-4 pb-6 pt-10">
+        <Skeleton className="h-16 w-16 rounded-xl" />
+        <div className="flex-1 space-y-2">
           <Skeleton className="h-6 w-48" />
           <Skeleton className="h-4 w-80" />
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4">
-        <Skeleton className="w-full h-52 rounded-xl" />
+      <div className="mx-auto max-w-5xl px-4 pb-8">
+        <Skeleton className="h-56 w-full rounded-2xl md:h-72" />
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 py-10 space-y-10">
+      <main className="mx-auto max-w-5xl space-y-8 px-4 pb-16">
         <section className="space-y-3">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-4 w-full" />
@@ -34,14 +33,13 @@ export default function PreviewLoading() {
           <Skeleton className="h-4 w-full" />
         </section>
 
-        {/* Jobs list skeleton */}
         <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="border border-gray-200 rounded-lg bg-white px-4 py-3 space-y-3"
+              className="space-y-3 rounded-2xl border border-slate-800/80 bg-slate-900/70 px-4 py-3"
             >
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-40" />
                   <Skeleton className="h-3 w-32" />
