@@ -36,7 +36,7 @@ export async function POST(
       skills: j.skills,
       last_application_date: j.last_application_date,
       assignment_url: null,
-      application: null,
+      applications: null,
       company: companyId,
       salary_range: j.salary_range,
       job_slug: j.job_slug,
